@@ -1,38 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Platform Analytics Summariser</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --bg: #ffffff; --bg-secondary: #f6f6f4; --bg-info: #e6f1fb; --bg-success: #eaf3de;
+      --bg: #ffffff; --bg-secondary: #f6f6f4; --bg-info: #e6f1fb; --bg-success: #eaf3de; --bg-danger: #fcebeb; --bg-warning: #faeeda;
       --text-primary: #1a1a18; --text-secondary: #6b6b67; --text-tertiary: #9b9b96;
-      --text-info: #185fa5; --text-danger: #a32d2d; --text-success: #3b6d11;
+      --text-info: #185fa5; --text-danger: #a32d2d; --text-success: #3b6d11; --text-warning: #854f0b;
       --border: rgba(0,0,0,0.12); --border-md: rgba(0,0,0,0.22);
       --radius-md: 8px; --radius-lg: 12px;
       --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       --font-mono: 'SF Mono', 'Fira Code', monospace;
+      --skeleton: #ebebeb;
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1c1c1a; --bg-secondary: #252523; --bg-info: #0c3358; --bg-success: #173404;
-        --text-primary: #f0efeb; --text-secondary: #a8a8a3; --text-tertiary: #6b6b67;
-        --text-info: #85b7eb; --text-danger: #f09595; --text-success: #c0dd97;
-        --border: rgba(255,255,255,0.1); --border-md: rgba(255,255,255,0.2);
-      }
-    }
-    body { font-family: var(--font); background: var(--bg-secondary); color: var(--text-primary); min-height: 100vh; padding: 2rem 1rem; }
-    .page { max-width: 760px; margin: 0 auto; }
-    header { margin-bottom: 2rem; }
-    header h1 { font-size: 22px; font-weight: 500; margin-bottom: 6px; }
-    header p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-    .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
 
+    [data-theme="dark"] {
+      --bg: #1c1c1a; --bg-secondary: #252523; --bg-info: #0c3358; --bg-success: #173404; --bg-danger: #3d1212; --bg-warning: #412402;
+      --text-primary: #f0efeb; --text-secondary: #a8a8a3; --text-tertiary: #6b6b67;
+      --text-info: #85b7eb; --text-danger: #f09595; --text-success: #c0dd97; --text-warning: #fac775;
+      --border: rgba(255,255,255,0.1); --border-md: rgba(255,255,255,0.2);
+      --skeleton: #333330;
+    }
+
+    body { font-family: var(--font); background: var(--bg-secondary); color: var(--text-primary); min-height: 100vh; padding: 2rem 1rem; transition: background 0.2s, color 0.2s; }
+    .page { max-width: 780px; margin: 0 auto; }
+
+    .site-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; gap: 12px; }
+    .site-header h1 { font-size: 22px; font-weight: 500; margin-bottom: 6px; }
+    .site-header p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+    .header-actions { display: flex; gap: 8px; flex-shrink: 0; padding-top: 4px; }
+    .icon-btn { width: 34px; height: 34px; border-radius: var(--radius-md); border: 0.5px solid var(--border-md); background: var(--bg); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.15s; font-family: var(--font); }
+    .icon-btn:hover { background: var(--bg-secondary); }
+
+    .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
     .top-controls { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-    .tabs { display: flex; gap: 6px; }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
     .tab { padding: 6px 14px; border-radius: var(--radius-md); border: 0.5px solid var(--border-md); font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: var(--text-secondary); font-family: var(--font); transition: all 0.15s; }
     .tab.active { background: var(--bg-secondary); color: var(--text-primary); }
 
@@ -40,28 +49,34 @@
     .mode-btn { padding: 6px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--border-md); font-size: 12px; font-weight: 500; cursor: pointer; background: transparent; color: var(--text-secondary); font-family: var(--font); transition: all 0.15s; }
     .mode-btn.active { background: var(--bg-info); color: var(--text-info); border-color: var(--text-info); }
 
-    .platform-badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 999px; margin-bottom: 12px; background: var(--bg-info); color: var(--text-info); }
-    label { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+    .platform-badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; background: var(--bg-info); color: var(--text-info); }
     .hint { font-size: 12px; color: var(--text-tertiary); margin-bottom: 10px; line-height: 1.5; }
 
     .inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .inputs-grid.single { grid-template-columns: 1fr; }
-    .input-col label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
-
-    textarea { width: 100%; min-height: 130px; resize: vertical; font-size: 12px; font-family: var(--font-mono); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; background: var(--bg-secondary); color: var(--text-primary); line-height: 1.6; }
+    .input-col label { font-size: 12px; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+    textarea { width: 100%; min-height: 120px; resize: vertical; font-size: 12px; font-family: var(--font-mono); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; background: var(--bg-secondary); color: var(--text-primary); line-height: 1.6; }
     textarea:focus { outline: none; border-color: var(--border-md); }
 
-    .actions { margin-top: 1rem; display: flex; align-items: center; gap: 12px; }
+    .actions { margin-top: 1rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .analyse-btn { padding: 8px 20px; border-radius: var(--radius-md); border: 0.5px solid var(--border-md); font-size: 14px; font-weight: 500; cursor: pointer; background: var(--bg); color: var(--text-primary); font-family: var(--font); transition: all 0.15s; }
     .analyse-btn:hover { background: var(--bg-secondary); }
     .analyse-btn:active { transform: scale(0.98); }
     .analyse-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
+    .action-btn { padding: 8px 14px; border-radius: var(--radius-md); border: 0.5px solid var(--border-md); font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: var(--text-secondary); font-family: var(--font); transition: all 0.15s; display: none; align-items: center; gap: 6px; }
+    .action-btn:hover { background: var(--bg-secondary); }
+    .action-btn.visible { display: inline-flex; }
+
+    .share-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: var(--bg); font-size: 13px; padding: 10px 18px; border-radius: var(--radius-md); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
+    .share-toast.show { opacity: 1; }
+
     .loading { display: none; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); }
     .spinner { width: 15px; height: 15px; border: 2px solid var(--border-md); border-top-color: var(--text-secondary); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .error-msg { font-size: 13px; color: var(--text-danger); margin-top: 8px; min-height: 20px; }
+    @keyframes shimmer { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
+    .error-msg { font-size: 13px; color: var(--text-danger); margin-top: 8px; min-height: 20px; }
     .results { display: none; margin-top: 1.5rem; }
     .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-tertiary); margin: 1.5rem 0 0.75rem; }
 
@@ -71,9 +86,15 @@
     .ic-label { font-size: 12px; color: var(--text-secondary); }
     .ic-change { font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 999px; }
     .ic-change.up { background: var(--bg-success); color: var(--text-success); }
-    .ic-change.down { background: #fcebeb; color: var(--text-danger); }
+    .ic-change.down { background: var(--bg-danger); color: var(--text-danger); }
     .ic-change.neutral { background: var(--bg-secondary); color: var(--text-tertiary); border: 0.5px solid var(--border); }
     .ic-content { font-size: 13px; color: var(--text-primary); line-height: 1.55; }
+
+    .skeleton-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 1rem; animation: shimmer 1.4s ease-in-out infinite; }
+    .skeleton-line { height: 10px; background: var(--skeleton); border-radius: 4px; margin-bottom: 8px; }
+    .skeleton-line.short { width: 40%; }
+    .skeleton-line.med { width: 70%; }
+    .skeleton-line.full { width: 100%; }
 
     .recs-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
     .rec-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); align-items: flex-start; }
@@ -86,15 +107,48 @@
     .legend-item { display: flex; align-items: center; gap: 5px; }
     .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 
+    .benchmarks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+    .benchmark-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 1rem; }
+    .bm-metric { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+    .bm-values { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+    .bm-yours { font-size: 18px; font-weight: 500; color: var(--text-primary); }
+    .bm-avg { font-size: 12px; color: var(--text-tertiary); }
+    .bm-badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 999px; }
+    .bm-badge.above { background: var(--bg-success); color: var(--text-success); }
+    .bm-badge.below { background: var(--bg-danger); color: var(--text-danger); }
+    .bm-badge.on-par { background: var(--bg-warning); color: var(--text-warning); }
+    .bm-tier { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+    .cal-week-label { font-size: 11px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin: 0.75rem 0 0.4rem; grid-column: 1 / -1; }
+    .cal-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px 8px; min-height: 100px; }
+    .cal-day { font-size: 11px; font-weight: 500; color: var(--text-tertiary); margin-bottom: 5px; }
+    .cal-type { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 999px; display: inline-block; margin-bottom: 5px; background: var(--bg-info); color: var(--text-info); }
+    .cal-idea { font-size: 11px; color: var(--text-primary); line-height: 1.4; margin-bottom: 4px; font-weight: 500; }
+    .cal-rationale { font-size: 10px; color: var(--text-secondary); line-height: 1.4; }
+
     footer { margin-top: 3rem; font-size: 12px; color: var(--text-tertiary); text-align: center; }
+
+    @media (max-width: 600px) {
+      .calendar-grid { grid-template-columns: repeat(3, 1fr); }
+      .inputs-grid { grid-template-columns: 1fr; }
+      .top-controls { flex-direction: column; align-items: flex-start; }
+    }
   </style>
 </head>
 <body>
   <div class="page">
-    <header>
-      <h1>Platform analytics summariser</h1>
-      <p>Paste your raw analytics data and get AI-powered strategy insights for music creators.</p>
-    </header>
+    <div class="site-header">
+      <div>
+        <h1>Platform analytics summariser</h1>
+        <p>AI-powered strategy insights for music creators.</p>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="share-btn" onclick="shareResults()" title="Share results" style="display:none;">&#8599;</button>
+        <button class="icon-btn" id="pdf-btn" onclick="exportPDF()" title="Export PDF" style="display:none;">&#8681;</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Toggle dark mode" id="theme-btn">&#9788;</button>
+      </div>
+    </div>
 
     <div class="card">
       <div class="top-controls">
@@ -110,16 +164,16 @@
       </div>
 
       <span id="platform-badge" class="platform-badge">TikTok</span>
-      <p class="hint" id="hint-text">Include: views, followers, likes, comments, shares, watch time, top videos, audience demographics, traffic sources — whatever you have.</p>
+      <p class="hint" id="hint-text">Include: views, followers, likes, comments, shares, watch time, top videos, audience demographics, traffic sources.</p>
 
-      <div class="inputs-grid" id="inputs-grid">
+      <div class="inputs-grid single" id="inputs-grid">
         <div class="input-col" id="col-a">
-          <label id="label-a">Paste your TikTok analytics data</label>
+          <label id="label-a">Paste your analytics data</label>
           <textarea id="analytics-input" placeholder="e.g. Followers: 12,400&#10;Total views: 890,000&#10;Avg watch time: 8.2s&#10;Audience: 68% female, 18-24 (42%), UK (31%)&#10;Traffic: For You Page (74%)"></textarea>
         </div>
         <div class="input-col" id="col-b" style="display:none;">
-          <label id="label-b">This month / newer period</label>
-          <textarea id="analytics-input-b" placeholder="e.g. Followers: 14,200&#10;Total views: 1,100,000&#10;Avg watch time: 9.8s&#10;Audience: 71% female, 18-24 (48%), UK (33%)&#10;Traffic: For You Page (81%)"></textarea>
+          <label>This month / newer period</label>
+          <textarea id="analytics-input-b" placeholder="e.g. Followers: 14,200&#10;Total views: 1,100,000&#10;Avg watch time: 9.8s&#10;Audience: 71% female, 18-24 (48%)&#10;Traffic: For You Page (81%)"></textarea>
         </div>
       </div>
 
@@ -127,7 +181,7 @@
         <button class="analyse-btn" id="analyse-btn" onclick="analyse()">Analyse ↗</button>
         <div class="loading" id="loading">
           <div class="spinner"></div>
-          <span>Analysing your data...</span>
+          <span id="loading-text">Analysing your data...</span>
         </div>
       </div>
       <p class="error-msg" id="error-msg"></p>
@@ -148,41 +202,42 @@
         </div>
       </div>
 
+      <p class="section-label">Benchmarks vs industry averages</p>
+      <div class="benchmarks-grid" id="benchmarks-grid"></div>
+
       <p class="section-label">Monetisation opportunities</p>
       <div class="insight-grid" id="monetisation-grid"></div>
 
       <p class="section-label">Growth strategy recommendations</p>
       <div class="recs-card" id="recs-list"></div>
+
+      <p class="section-label">2-week content calendar</p>
+      <div class="calendar-grid" id="calendar-grid"></div>
     </div>
 
     <footer>Built with Claude API &mdash; a project by Yamina</footer>
   </div>
 
+  <div class="share-toast" id="share-toast">Link copied to clipboard</div>
+
   <script>
     const platformConfig = {
-      tiktok: {
-        badge: 'TikTok',
-        hint: 'Include: views, followers, likes, comments, shares, watch time, top videos, audience demographics, traffic sources — whatever you have.',
-        placeholderA: "e.g. Followers: 12,400\nTotal views: 890,000\nAvg watch time: 8.2s\nAudience: 68% female, 18-24 (42%), UK (31%), US (22%)\nTraffic: For You Page (74%), Following (18%)",
-        placeholderB: "e.g. Followers: 14,200\nTotal views: 1,100,000\nAvg watch time: 9.8s\nAudience: 71% female, 18-24 (48%), UK (33%)\nTraffic: For You Page (81%)"
-      },
-      spotify: {
-        badge: 'Spotify for Artists',
-        hint: 'Include: streams, monthly listeners, saves, playlist adds, follower count, top tracks, audience demographics, discovery sources.',
-        placeholderA: "e.g. Monthly listeners: 8,200\nTotal streams: 124,500\nSaves rate: 14%\nPlaylist adds: 340\nTop track: 'Late nights' — 32K streams\nAudience: 18-24 (38%), UK (44%)",
-        placeholderB: "e.g. Monthly listeners: 11,400\nTotal streams: 198,000\nSaves rate: 18%\nPlaylist adds: 520\nTop track: 'Late nights' — 51K streams\nAudience: 18-24 (41%), UK (46%)"
-      },
-      instagram: {
-        badge: 'Instagram',
-        hint: 'Include: followers, reach, impressions, profile visits, likes, comments, saves, shares, top posts, story views, reel plays, audience demographics.',
-        placeholderA: "e.g. Followers: 9,800\nReach: 42,000\nImpressions: 98,000\nProfile visits: 3,200\nTop reel: 'Live set clip' — 28K plays\nAudience: 18-24 (44%), UK (52%)\nBest content: Reels (72% of reach)",
-        placeholderB: "e.g. Followers: 11,600\nReach: 67,000\nImpressions: 134,000\nProfile visits: 5,100\nTop reel: 'Behind the set' — 41K plays\nAudience: 18-24 (47%), UK (54%)\nBest content: Reels (79% of reach)"
-      }
+      tiktok: { badge: 'TikTok', hint: 'Include: views, followers, likes, comments, shares, watch time, top videos, audience demographics, traffic sources.', placeholderA: "e.g. Followers: 24,800\nTotal views: 2,400,000\nAvg watch time: 11.4s\nCompletion rate: 38%\nAudience: 71% female, 18-24 (54%), UK (38%)\nTraffic: For You Page (79%)", placeholderB: "e.g. Followers: 28,100\nTotal views: 3,100,000\nAvg watch time: 13.2s\nCompletion rate: 42%\nAudience: 73% female, 18-24 (57%), UK (41%)\nTraffic: For You Page (83%)" },
+      spotify: { badge: 'Spotify for Artists', hint: 'Include: streams, monthly listeners, saves, playlist adds, follower count, top tracks, audience demographics, discovery sources.', placeholderA: "e.g. Monthly listeners: 8,200\nTotal streams: 124,500\nSaves rate: 14%\nPlaylist adds: 340\nFollowers: 1,890\nTop track: 'Late nights' — 32K streams\nAudience: 18-24 (38%), UK (44%)", placeholderB: "e.g. Monthly listeners: 11,400\nTotal streams: 198,000\nSaves rate: 18%\nPlaylist adds: 520\nFollowers: 2,340\nTop track: 'Late nights' — 51K streams\nAudience: 18-24 (41%), UK (46%)" },
+      instagram: { badge: 'Instagram', hint: 'Include: followers, reach, impressions, profile visits, likes, comments, saves, shares, top posts, story views, reel plays, audience demographics.', placeholderA: "e.g. Followers: 9,800\nReach: 42,000\nImpressions: 98,000\nTop reel: 'Live set clip' — 28K plays\nAudience: 18-24 (44%), UK (52%)\nBest content: Reels (72% of reach)", placeholderB: "e.g. Followers: 11,600\nReach: 67,000\nImpressions: 134,000\nTop reel: 'Behind the set' — 41K plays\nAudience: 18-24 (47%), UK (54%)\nBest content: Reels (79% of reach)" }
     };
 
     let currentPlatform = 'tiktok';
     let currentMode = 'single';
     let chartInstance = null;
+    let lastResults = null;
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-btn').textContent = isDark ? '☀' : '☾';
+    }
 
     function switchTab(platform, el) {
       currentPlatform = platform;
@@ -195,8 +250,7 @@
       document.getElementById('analytics-input-b').placeholder = cfg.placeholderB;
       document.getElementById('analytics-input').value = '';
       document.getElementById('analytics-input-b').value = '';
-      document.getElementById('results').style.display = 'none';
-      document.getElementById('error-msg').textContent = '';
+      hideResults();
     }
 
     function switchMode(mode, el) {
@@ -204,15 +258,33 @@
       document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
       el.classList.add('active');
       const isComparison = mode === 'comparison';
-      const grid = document.getElementById('inputs-grid');
-      const colB = document.getElementById('col-b');
-      const labelA = document.getElementById('label-a');
-      grid.className = isComparison ? 'inputs-grid' : 'inputs-grid single';
-      colB.style.display = isComparison ? 'block' : 'none';
-      labelA.textContent = isComparison ? 'Last month / older period' : `Paste your ${platformConfig[currentPlatform].badge} analytics data`;
+      document.getElementById('inputs-grid').className = isComparison ? 'inputs-grid' : 'inputs-grid single';
+      document.getElementById('col-b').style.display = isComparison ? 'block' : 'none';
+      document.getElementById('label-a').textContent = isComparison ? 'Last month / older period' : 'Paste your analytics data';
+      hideResults();
+    }
+
+    function hideResults() {
       document.getElementById('results').style.display = 'none';
       document.getElementById('error-msg').textContent = '';
+      document.getElementById('share-btn').style.display = 'none';
+      document.getElementById('pdf-btn').style.display = 'none';
+      lastResults = null;
     }
+
+    function showSkeletons() {
+      const skeleton = () => `<div class="skeleton-card"><div class="skeleton-line short"></div><div class="skeleton-line med"></div><div class="skeleton-line full"></div></div>`;
+      ['audience-grid','content-grid','monetisation-grid'].forEach(id => {
+        document.getElementById(id).innerHTML = skeleton() + skeleton() + skeleton();
+      });
+      document.getElementById('benchmarks-grid').innerHTML = skeleton() + skeleton() + skeleton() + skeleton();
+      document.getElementById('recs-list').innerHTML = skeleton() + skeleton();
+      document.getElementById('calendar-grid').innerHTML = Array(14).fill(skeleton()).join('');
+      document.getElementById('results').style.display = 'block';
+    }
+
+    const loadingMessages = ['Analysing your data...', 'Identifying patterns...', 'Generating insights...', 'Building your calendar...'];
+    let loadingInterval;
 
     async function analyse() {
       const input = document.getElementById('analytics-input').value.trim();
@@ -221,29 +293,36 @@
       if (currentMode === 'comparison' && !inputB) { document.getElementById('error-msg').textContent = 'Please paste data for both periods.'; return; }
 
       document.getElementById('error-msg').textContent = '';
-      document.getElementById('results').style.display = 'none';
-      document.getElementById('loading').style.display = 'flex';
       document.getElementById('analyse-btn').disabled = true;
+      document.getElementById('loading').style.display = 'flex';
+      showSkeletons();
+
+      let msgIdx = 0;
+      loadingInterval = setInterval(() => {
+        msgIdx = (msgIdx + 1) % loadingMessages.length;
+        document.getElementById('loading-text').textContent = loadingMessages[msgIdx];
+      }, 1800);
 
       try {
         const res = await fetch('/api/analyse', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            analyticsData: input,
-            analyticsDataB: inputB || null,
-            platform: currentPlatform,
-            mode: currentMode
-          })
+          body: JSON.stringify({ analyticsData: input, analyticsDataB: inputB || null, platform: currentPlatform, mode: currentMode })
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
+        lastResults = data;
         renderResults(data);
+        document.getElementById('share-btn').style.display = 'flex';
+        document.getElementById('pdf-btn').style.display = 'flex';
       } catch (e) {
         document.getElementById('error-msg').textContent = 'Something went wrong — please try again.';
+        document.getElementById('results').style.display = 'none';
         console.error(e);
       } finally {
+        clearInterval(loadingInterval);
         document.getElementById('loading').style.display = 'none';
+        document.getElementById('loading-text').textContent = loadingMessages[0];
         document.getElementById('analyse-btn').disabled = false;
       }
     }
@@ -252,15 +331,14 @@
       renderGrid('audience-grid', data.audience);
       renderGrid('content-grid', data.content);
       renderGrid('monetisation-grid', data.monetisation);
+      if (data.benchmarks) renderBenchmarks(data.benchmarks);
+      if (data.chart) renderChart(data.chart);
+      if (data.calendar) renderCalendar(data.calendar);
 
-      const recsList = document.getElementById('recs-list');
-      recsList.innerHTML = data.recommendations.map((r, i) =>
+      document.getElementById('recs-list').innerHTML = data.recommendations.map((r, i) =>
         `<div class="rec-item"><span class="rec-num">${i + 1}</span><span class="rec-text">${r}</span></div>`
       ).join('');
 
-      if (data.chart) renderChart(data.chart);
-
-      document.getElementById('results').style.display = 'block';
       document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -278,55 +356,167 @@
       }).join('');
     }
 
+    function renderBenchmarks(benchmarks) {
+      document.getElementById('benchmarks-grid').innerHTML = benchmarks.map(b => `
+        <div class="benchmark-card">
+          <div class="bm-metric">${b.metric}</div>
+          <div class="bm-values">
+            <span class="bm-yours">${b.yourValue}</span>
+            <span class="bm-avg">avg ${b.benchmark}</span>
+          </div>
+          <span class="bm-badge ${b.status}">${b.status === 'on-par' ? 'on par' : b.status}</span>
+          <div class="bm-tier">${b.tier}</div>
+        </div>`).join('');
+    }
+
+    function renderCalendar(calendar) {
+      const week1 = calendar.slice(0, 7);
+      const week2 = calendar.slice(7, 14);
+      let html = '<div class="cal-week-label" style="grid-column:1/-1">Week 1</div>';
+      week1.forEach(day => { html += calCard(day); });
+      html += '<div class="cal-week-label" style="grid-column:1/-1">Week 2</div>';
+      week2.forEach(day => { html += calCard(day); });
+      document.getElementById('calendar-grid').innerHTML = html;
+    }
+
+    function calCard(day) {
+      return `<div class="cal-card">
+        <div class="cal-day">${day.day}</div>
+        <span class="cal-type">${day.type}</span>
+        <div class="cal-idea">${day.idea}</div>
+        <div class="cal-rationale">${day.rationale}</div>
+      </div>`;
+    }
+
     function renderChart(chartData) {
       if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
       const ctx = document.getElementById('myChart').getContext('2d');
       const legend = document.getElementById('chart-legend');
-
-      const colorA = '#378ADD';
-      const colorB = '#1D9E75';
+      const colorA = '#378ADD', colorB = '#1D9E75';
 
       if (chartData.dataA && chartData.dataB) {
-        legend.innerHTML = `
-          <span class="legend-item"><span class="legend-dot" style="background:${colorA}"></span>${chartData.periodA || 'Period A'}</span>
-          <span class="legend-item"><span class="legend-dot" style="background:${colorB}"></span>${chartData.periodB || 'Period B'} — ${chartData.unit || ''}</span>`;
-        chartInstance = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: chartData.labels,
-            datasets: [
-              { label: chartData.periodA || 'Period A', data: chartData.dataA, backgroundColor: colorA, borderRadius: 4 },
-              { label: chartData.periodB || 'Period B', data: chartData.dataB, backgroundColor: colorB, borderRadius: 4 }
-            ]
-          },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { display: false }, ticks: { color: '#9b9b96', font: { size: 12 } } },
-              y: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#9b9b96', font: { size: 12 } } }
-            }
-          }
-        });
+        legend.innerHTML = `<span class="legend-item"><span class="legend-dot" style="background:${colorA}"></span>${chartData.periodA || 'Period A'}</span><span class="legend-item"><span class="legend-dot" style="background:${colorB}"></span>${chartData.periodB || 'Period B'} — ${chartData.unit || ''}</span>`;
+        chartInstance = new Chart(ctx, { type: 'bar', data: { labels: chartData.labels, datasets: [{ label: chartData.periodA, data: chartData.dataA, backgroundColor: colorA, borderRadius: 4 }, { label: chartData.periodB, data: chartData.dataB, backgroundColor: colorB, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#9b9b96', font: { size: 11 } } }, y: { grid: { color: 'rgba(128,128,128,0.12)' }, ticks: { color: '#9b9b96', font: { size: 11 } } } } } });
       } else {
         legend.innerHTML = `<span class="legend-item"><span class="legend-dot" style="background:${colorA}"></span>${chartData.title || 'Breakdown'} — ${chartData.unit || ''}</span>`;
-        chartInstance = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: chartData.labels,
-            datasets: [{ data: chartData.data, backgroundColor: colorA, borderRadius: 4 }]
-          },
-          options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { display: false }, ticks: { color: '#9b9b96', font: { size: 12 } } },
-              y: { grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#9b9b96', font: { size: 12 } } }
-            }
-          }
-        });
+        chartInstance = new Chart(ctx, { type: 'bar', data: { labels: chartData.labels, datasets: [{ data: chartData.data, backgroundColor: colorA, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#9b9b96', font: { size: 11 } } }, y: { grid: { color: 'rgba(128,128,128,0.12)' }, ticks: { color: '#9b9b96', font: { size: 11 } } } } } });
       }
     }
+
+    function shareResults() {
+      if (!lastResults) return;
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(lastResults))));
+      const url = window.location.origin + window.location.pathname + '?r=' + encoded;
+      navigator.clipboard.writeText(url).then(() => {
+        const toast = document.getElementById('share-toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+      });
+    }
+
+    function exportPDF() {
+      if (!lastResults) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const margin = 18;
+      const pageW = 210;
+      let y = margin;
+
+      const addText = (text, size, bold, color) => {
+        doc.setFontSize(size);
+        doc.setFont('helvetica', bold ? 'bold' : 'normal');
+        doc.setTextColor(...(color || [26, 26, 24]));
+        doc.text(String(text), margin, y);
+      };
+
+      const wrap = (text, size, maxW) => {
+        doc.setFontSize(size);
+        doc.setFont('helvetica', 'normal');
+        const lines = doc.splitTextToSize(String(text), maxW);
+        doc.setTextColor(26, 26, 24);
+        doc.text(lines, margin, y);
+        return lines.length;
+      };
+
+      const sectionLabel = (label) => {
+        if (y > 260) { doc.addPage(); y = margin; }
+        y += 6;
+        doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+        doc.setTextColor(155, 155, 150);
+        doc.text(label.toUpperCase(), margin, y);
+        y += 5;
+      };
+
+      const checkPage = (needed) => { if (y + needed > 275) { doc.addPage(); y = margin; } };
+
+      doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(26, 26, 24);
+      doc.text('Platform analytics report', margin, y); y += 8;
+      doc.setFontSize(11); doc.setFont('helvetica', 'normal'); doc.setTextColor(107, 107, 103);
+      doc.text(`${platformConfig[currentPlatform].badge} — ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, margin, y);
+      y += 10;
+      doc.setDrawColor(220, 220, 216); doc.line(margin, y, pageW - margin, y); y += 8;
+
+      const renderSection = (title, items) => {
+        sectionLabel(title);
+        if (!items) return;
+        items.forEach(item => {
+          checkPage(16);
+          doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(26, 26, 24);
+          doc.text(item.label, margin, y); y += 4;
+          const lines = doc.splitTextToSize(item.insight, pageW - margin * 2);
+          doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(107, 107, 103);
+          doc.text(lines, margin, y); y += lines.length * 4.5 + 4;
+        });
+      };
+
+      renderSection('Audience & demographics', lastResults.audience);
+      renderSection('Content performance', lastResults.content);
+      renderSection('Monetisation opportunities', lastResults.monetisation);
+
+      sectionLabel('Growth strategy recommendations');
+      if (lastResults.recommendations) {
+        lastResults.recommendations.forEach((r, i) => {
+          checkPage(14);
+          const lines = doc.splitTextToSize(`${i + 1}. ${r}`, pageW - margin * 2);
+          doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(26, 26, 24);
+          doc.text(lines, margin, y); y += lines.length * 4.5 + 4;
+        });
+      }
+
+      if (lastResults.calendar) {
+        sectionLabel('2-week content calendar');
+        lastResults.calendar.forEach((day, i) => {
+          checkPage(14);
+          if (i === 7) { y += 3; }
+          doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(26, 26, 24);
+          doc.text(`${day.day} — ${day.type}: ${day.idea}`, margin, y); y += 4;
+          const lines = doc.splitTextToSize(day.rationale, pageW - margin * 2);
+          doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(107, 107, 103);
+          doc.text(lines, margin, y); y += lines.length * 4 + 3;
+        });
+      }
+
+      y += 8;
+      doc.setFontSize(9); doc.setTextColor(155, 155, 150);
+      doc.text('Generated by Platform Analytics Summariser — built with Claude API', margin, y);
+
+      doc.save(`analytics-report-${new Date().toISOString().slice(0,10)}.pdf`);
+    }
+
+    window.addEventListener('load', () => {
+      const params = new URLSearchParams(window.location.search);
+      const r = params.get('r');
+      if (r) {
+        try {
+          const data = JSON.parse(decodeURIComponent(escape(atob(r))));
+          lastResults = data;
+          document.getElementById('results').style.display = 'block';
+          renderResults(data);
+          document.getElementById('share-btn').style.display = 'flex';
+          document.getElementById('pdf-btn').style.display = 'flex';
+        } catch(e) { console.error('Could not load shared results', e); }
+      }
+    });
   </script>
 </body>
 </html>
