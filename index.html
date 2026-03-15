@@ -7,165 +7,263 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #ffffff; --bg-secondary: #f6f6f4; --bg-info: #e6f1fb; --bg-success: #eaf3de;
-      --bg-danger: #fcebeb; --bg-warning: #faeeda;
-      --text-primary: #1a1a18; --text-secondary: #6b6b67; --text-tertiary: #9b9b96;
-      --text-info: #185fa5; --text-danger: #a32d2d; --text-success: #3b6d11; --text-warning: #854f0b;
-      --border: rgba(0,0,0,0.12); --border-md: rgba(0,0,0,0.22);
-      --radius-md: 8px; --radius-lg: 12px;
-      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      --font-mono: 'SF Mono','Fira Code',monospace;
-      --skeleton: #ebebeb;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f0eeff;--surface:#fff;--surface2:#eae6ff;
+      --p50:#f0eeff;--p100:#ddd8ff;--p200:#c2b9ff;--p400:#8b7cf8;--p500:#7c6af5;--p600:#6354e8;--p800:#2d1f7a;
+      --b400:#3b9eff;--b600:#1a7fd4;
+      --bg-success:#eaf3de;--bg-danger:#fcebeb;--bg-warning:#faeeda;
+      --text-primary:#1a1640;--text-secondary:#6b6899;--text-tertiary:#a8a5c4;
+      --text-success:#3b6d11;--text-danger:#a32d2d;--text-warning:#854f0b;
+      --border:rgba(120,100,240,.13);--border-md:rgba(120,100,240,.26);
+      --radius-md:12px;--radius-lg:18px;--radius-xl:24px;
+      --font:'DM Sans',sans-serif;--font-display:'Syne',sans-serif;
+      --font-mono:'SF Mono','Fira Code',monospace;
+      --sh:0 2px 12px rgba(99,84,232,.09);--sh-md:0 6px 28px rgba(99,84,232,.15);
+      --sk:#ddd8ff;
     }
-    [data-theme="dark"] {
-      --bg: #1c1c1a; --bg-secondary: #252523; --bg-info: #0c3358; --bg-success: #173404;
-      --bg-danger: #3d1212; --bg-warning: #412402;
-      --text-primary: #f0efeb; --text-secondary: #a8a8a3; --text-tertiary: #6b6b67;
-      --text-info: #85b7eb; --text-danger: #f09595; --text-success: #c0dd97; --text-warning: #fac775;
-      --border: rgba(255,255,255,0.1); --border-md: rgba(255,255,255,0.2);
-      --skeleton: #333330;
+    [data-theme=dark]{
+      --bg:#0d0b1a;--surface:#17142b;--surface2:#211d3a;
+      --p50:#1c1836;--p100:#2a2550;--p200:#3a3468;
+      --text-primary:#f0eeff;--text-secondary:#9b97c4;--text-tertiary:#5a5680;
+      --border:rgba(140,120,255,.13);--border-md:rgba(140,120,255,.26);
+      --sh:0 2px 12px rgba(0,0,0,.3);--sh-md:0 6px 28px rgba(0,0,0,.45);
+      --sk:#2a2650;
     }
-    body { font-family: var(--font); background: var(--bg-secondary); color: var(--text-primary); min-height: 100vh; padding: 2rem 1rem; transition: background 0.2s, color 0.2s; }
-    .page { max-width: 800px; margin: 0 auto; }
+    body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-height:100vh;padding:0;transition:background .3s,color .3s;overflow-x:hidden}
+    .mesh-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    .mesh-bg svg{width:100%;height:100%;position:absolute;inset:0}
+    .blob{animation:blobFloat 18s ease-in-out infinite}
+    .blob:nth-child(2){animation-duration:22s;animation-delay:-6s}
+    .blob:nth-child(3){animation-duration:26s;animation-delay:-12s}
+    .blob:nth-child(4){animation-duration:20s;animation-delay:-4s}
+    @keyframes blobFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(30px,-20px) scale(1.04)}50%{transform:translate(-20px,30px) scale(.97)}75%{transform:translate(20px,20px) scale(1.02)}}
+    [data-theme=dark] .mesh-bg{opacity:.55}
+    .page{max-width:820px;margin:0 auto;padding:2.5rem 1.5rem 5rem;position:relative;z-index:1}
+    .site-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:3rem;gap:16px}
+    .logo-area{display:flex;flex-direction:column;gap:4px}
+    .logo-badge{display:inline-flex;align-items:center;gap:6px;background:var(--p50);border:1px solid var(--p100);border-radius:999px;padding:4px 12px 4px 8px;font-family:var(--font-display);font-size:10px;font-weight:700;color:var(--p600);letter-spacing:.06em;text-transform:uppercase;width:fit-content;margin-bottom:6px}
+    .logo-dot{width:7px;height:7px;background:var(--p400);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+    h1{font-family:var(--font-display);font-size:34px;font-weight:800;color:var(--text-primary);line-height:1.08;letter-spacing:-.025em}
+    h1 em{color:var(--p500);font-style:normal}
+    .site-header p{font-size:14px;color:var(--text-secondary);line-height:1.65;margin-top:7px}
+    .header-actions{display:flex;gap:8px;flex-shrink:0;padding-top:4px}
+    .icon-btn{width:36px;height:36px;border-radius:var(--radius-md);border:1px solid var(--border-md);background:var(--surface);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;box-shadow:var(--sh)}
+    .icon-btn:hover{background:var(--p50);color:var(--p600);border-color:var(--p200);transform:translateY(-1px)}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:1.5rem;margin-bottom:1rem;box-shadow:var(--sh)}
+    .step-pill{display:inline-flex;align-items:center;gap:7px;background:var(--p50);border-radius:999px;padding:4px 12px 4px 5px;font-family:var(--font-display);font-size:10px;font-weight:700;color:var(--p600);letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.1rem}
+    .step-num{width:20px;height:20px;background:var(--p500);border-radius:50%;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .creator-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+    .creator-btn{padding:16px 8px 14px;border-radius:var(--radius-lg);border:1.5px solid var(--border);background:var(--surface);color:var(--text-secondary);font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:var(--sh)}
+    .creator-btn .cb-icon{width:42px;height:42px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:21px;background:var(--surface2);transition:all .2s}
+    .creator-btn:hover{border-color:var(--p200);transform:translateY(-3px);box-shadow:var(--sh-md)}
+    .creator-btn.active{border-color:var(--p400);background:var(--p50);color:var(--p800)}
+    .creator-btn.active .cb-icon{background:var(--p100)}
+    .platform-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem}
+    .platform-btn{padding:7px 17px;border-radius:999px;border:1.5px solid var(--border-md);background:transparent;color:var(--text-secondary);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+    .platform-btn:hover{border-color:var(--p200);color:var(--p600);background:var(--p50)}
+    .platform-btn.active{background:var(--p500);color:#fff;border-color:var(--p500)}
+    .mode-row{display:inline-flex;gap:3px;margin-bottom:1.25rem;margin-top:.75rem;background:var(--surface2);border-radius:999px;padding:4px}
+    .mode-btn{padding:6px 15px;border-radius:999px;border:none;font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:var(--text-secondary);transition:all .2s}
+    .mode-btn.active{background:var(--surface);color:var(--p600);box-shadow:var(--sh)}
+    .hint{font-size:12px;color:var(--text-tertiary);margin-bottom:12px;line-height:1.65}
+    .inputs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .inputs-grid.single{grid-template-columns:1fr}
+    .input-col label{font-size:12px;font-weight:500;color:var(--text-secondary);display:block;margin-bottom:6px}
+    textarea{width:100%;min-height:120px;resize:vertical;font-size:12px;font-family:var(--font);border:1.5px solid var(--border-md);border-radius:var(--radius-md);padding:12px;background:var(--surface2);color:var(--text-primary);line-height:1.65;transition:border-color .2s}
+    textarea:focus{outline:none;border-color:var(--p400);background:var(--surface)}
+    textarea::placeholder{color:var(--text-tertiary)}
+    .analyse-btn{padding:12px 30px;border-radius:999px;background:linear-gradient(135deg,var(--p500),var(--b600));border:none;color:#fff;font-family:var(--font-display);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.01em;box-shadow:0 4px 18px rgba(99,84,232,.38)}
+    .analyse-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(99,84,232,.48)}
+    .analyse-btn:active{transform:translateY(0)}
+    .analyse-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+    .actions{margin-top:1.25rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .error-msg{font-size:13px;color:#e24b4a;margin-top:8px;min-height:18px}
+    .loading{display:none;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary)}
+    .spinner{width:16px;height:16px;border:2.5px solid var(--border-md);border-top-color:var(--p400);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes shimmer{0%,100%{opacity:.4}50%{opacity:.9}}
+    .results{display:none;margin-top:1.5rem}
+    .section-label{font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin:2rem 0 .9rem;display:flex;align-items:center;gap:10px}
+    .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+    .insight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+    .insight-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.1rem;box-shadow:var(--sh);transition:transform .2s,box-shadow .2s}
+    .insight-card:hover{transform:translateY(-2px);box-shadow:var(--sh-md)}
+    .ic-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .ic-label{font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em}
+    .ic-change{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}
+    .ic-change.up{background:var(--bg-success);color:var(--text-success)}
+    .ic-change.down{background:var(--bg-danger);color:var(--text-danger)}
+    .ic-change.neutral{background:var(--surface2);color:var(--text-tertiary)}
+    .ic-content{font-size:13px;color:var(--text-primary);line-height:1.65}
+    .skeleton-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.1rem;animation:shimmer 1.4s ease-in-out infinite}
+    .skeleton-line{height:10px;background:var(--sk);border-radius:4px;margin-bottom:8px}
+    .skeleton-line.short{width:40%}.skeleton-line.med{width:65%}.skeleton-line.full{width:100%}
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:1.5rem;box-shadow:var(--sh)}
+    .chart-legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px;font-size:12px;color:var(--text-secondary)}
+    .legend-item{display:flex;align-items:center;gap:6px}
+    .legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+    .benchmarks-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px}
+    .benchmark-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.1rem;box-shadow:var(--sh)}
+    .bm-metric{font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+    .bm-values{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+    .bm-yours{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-primary)}
+    .bm-avg{font-size:12px;color:var(--text-tertiary)}
+    .bm-badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px}
+    .bm-badge.above{background:var(--bg-success);color:var(--text-success)}
+    .bm-badge.below{background:var(--bg-danger);color:var(--text-danger)}
+    .bm-badge.on-par{background:var(--p50);color:var(--p600)}
+    .bm-tier{font-size:11px;color:var(--text-tertiary);margin-top:5px}
+    .recs-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:1.25rem;box-shadow:var(--sh)}
+    .rec-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+    .rec-item:last-child{border-bottom:none;padding-bottom:0}
+    .rec-num{width:26px;height:26px;border-radius:8px;background:var(--p50);color:var(--p600);font-family:var(--font-display);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+    .rec-text{font-size:13px;color:var(--text-primary);line-height:1.65}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    .cal-week-label{font-family:var(--font-display);font-size:10px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.06em;grid-column:1/-1;margin:.75rem 0 .3rem}
+    .cal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 9px;min-height:110px;box-shadow:var(--sh);transition:transform .2s}
+    .cal-card:hover{transform:translateY(-2px)}
+    .cal-day{font-family:var(--font-display);font-size:10px;font-weight:700;color:var(--text-tertiary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+    .cal-type{font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px;display:inline-block;margin-bottom:6px;background:var(--p50);color:var(--p600)}
+    .cal-idea{font-size:11px;color:var(--text-primary);line-height:1.4;margin-bottom:4px;font-weight:500}
+    .cal-rationale{font-size:10px;color:var(--text-secondary);line-height:1.4}
+    .share-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--p800);color:#fff;font-size:13px;padding:10px 22px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100;white-space:nowrap;box-shadow:var(--sh-md)}
+    .share-toast.show{opacity:1}
+    footer{margin-top:4rem;font-size:12px;color:var(--text-tertiary);text-align:center}
+    footer em{color:var(--p400);font-style:normal}
+    @media(max-width:600px){
+      .calendar-grid{grid-template-columns:repeat(3,1fr)}
+      .inputs-grid{grid-template-columns:1fr}
+      .creator-grid{grid-template-columns:repeat(3,1fr)}
+      h1{font-size:27px}
+    }
 
-    .site-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; gap: 12px; }
-    .site-header h1 { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
-    .site-header p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-    .header-actions { display: flex; gap: 8px; flex-shrink: 0; padding-top: 4px; }
-    .icon-btn { width: 34px; height: 34px; border-radius: var(--radius-md); border: 0.5px solid var(--border-md); background: var(--bg); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; transition: all 0.15s; font-family: var(--font); }
-    .icon-btn:hover { background: var(--bg-secondary); }
+    /* Hero */
+    .hero{text-align:center;padding:4rem 1rem 3rem;position:relative}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:6px;background:var(--p50);border:1px solid var(--p100);border-radius:999px;padding:5px 14px 5px 9px;font-size:11px;font-weight:700;color:var(--p600);letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.5rem}
+    .hero h1{font-family:var(--font-display);font-size:52px;font-weight:800;line-height:1.05;letter-spacing:-.03em;margin-bottom:1rem}
+    .hero h1 em{color:var(--p500);font-style:normal}
+    .hero-sub{font-size:17px;color:var(--text-secondary);line-height:1.65;max-width:480px;margin:0 auto 2.5rem}
+    .hero-stats{display:flex;align-items:center;justify-content:center;gap:2.5rem;margin-bottom:3rem;flex-wrap:wrap}
+    .hero-stat{text-align:center}
+    .hero-stat-num{font-family:var(--font-display);font-size:26px;font-weight:800;color:var(--text-primary);display:block}
+    .hero-stat-lbl{font-size:12px;color:var(--text-tertiary)}
+    .hero-scroll{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--text-tertiary);font-size:12px;animation:scrollBounce 2s ease-in-out infinite}
+    .hero-scroll-arr{font-size:18px}
+    @keyframes scrollBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
-    .step-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
-    .step-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 0.75rem; }
+    /* How it works */
+    .how-section{margin:0 0 2.5rem}
+    .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .how-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;box-shadow:var(--sh);text-align:center}
+    .how-icon{font-size:28px;margin-bottom:10px;display:block}
+    .how-title{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:6px}
+    .how-desc{font-size:12px;color:var(--text-secondary);line-height:1.6}
+    .how-step{display:inline-block;font-size:10px;font-weight:700;color:var(--p600);background:var(--p50);border-radius:999px;padding:2px 9px;margin-bottom:10px;letter-spacing:.05em;text-transform:uppercase}
 
-    .creator-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
-    .creator-btn { padding: 14px 10px; border-radius: var(--radius-md); border: 0.5px solid var(--border-md); font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: var(--text-secondary); font-family: var(--font); transition: all 0.15s; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-    .creator-btn .cb-icon { font-size: 20px; }
-    .creator-btn:hover { background: var(--bg-secondary); }
-    .creator-btn.active { background: var(--bg-info); color: var(--text-info); border-color: var(--text-info); }
+    /* Sample data btn */
+    .sample-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--p600);background:var(--p50);border:1px solid var(--p100);border-radius:999px;padding:4px 12px;cursor:pointer;transition:all .2s;font-family:var(--font);margin-bottom:8px}
+    .sample-btn:hover{background:var(--p100);border-color:var(--p200)}
 
-    .platform-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
-    .platform-btn { padding: 6px 14px; border-radius: var(--radius-md); border: 0.5px solid var(--border-md); font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: var(--text-secondary); font-family: var(--font); transition: all 0.15s; }
-    .platform-btn:hover { background: var(--bg-secondary); }
-    .platform-btn.active { background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-md); }
+    /* Empty state textarea */
+    .textarea-wrap{position:relative}
+    .textarea-empty-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;transition:opacity .2s}
+    .textarea-empty-hint.hidden{opacity:0}
+    .teh-icon{font-size:24px;display:block;margin-bottom:6px;opacity:.4}
+    .teh-text{font-size:12px;color:var(--text-tertiary);white-space:nowrap}
 
-    .mode-row { display: flex; gap: 6px; margin-bottom: 1rem; }
-    .mode-btn { padding: 6px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--border-md); font-size: 12px; font-weight: 500; cursor: pointer; background: transparent; color: var(--text-secondary); font-family: var(--font); transition: all 0.15s; }
-    .mode-btn.active { background: var(--bg-info); color: var(--text-info); border-color: var(--text-info); }
+    /* Progress bar */
+    .progress-wrap{display:none;flex-direction:column;gap:10px;width:100%;margin-top:1rem}
+    .progress-steps{display:flex;gap:6px}
+    .progress-step{flex:1;height:4px;border-radius:999px;background:var(--surface2);overflow:hidden;position:relative}
+    .progress-step-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--p400),var(--b400));border-radius:999px;transition:width .6s ease}
+    .progress-step.done .progress-step-fill{width:100%}
+    .progress-step.active .progress-step-fill{width:60%;animation:progressPulse 1s ease-in-out infinite alternate}
+    @keyframes progressPulse{to{width:90%}}
+    .progress-labels{display:flex;gap:6px}
+    .progress-lbl{flex:1;font-size:10px;color:var(--text-tertiary);text-align:center;transition:color .3s}
+    .progress-lbl.active{color:var(--p500);font-weight:600}
+    .progress-lbl.done{color:var(--text-success)}
 
-    .hint { font-size: 12px; color: var(--text-tertiary); margin-bottom: 10px; line-height: 1.5; }
-    .inputs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .inputs-grid.single { grid-template-columns: 1fr; }
-    .input-col label { font-size: 12px; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px; }
-    textarea { width: 100%; min-height: 120px; resize: vertical; font-size: 12px; font-family: var(--font-mono); border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; background: var(--bg-secondary); color: var(--text-primary); line-height: 1.6; }
-    textarea:focus { outline: none; border-color: var(--border-md); }
+    /* Staggered card animations */
+    @keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .insight-card.animate{animation:cardIn .35s ease forwards}
+    .benchmark-card.animate{animation:cardIn .35s ease forwards}
+    .cal-card.animate{animation:cardIn .35s ease forwards}
 
-    .actions { margin-top: 1rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .analyse-btn { padding: 8px 20px; border-radius: var(--radius-md); border: 0.5px solid var(--border-md); font-size: 14px; font-weight: 500; cursor: pointer; background: var(--bg); color: var(--text-primary); font-family: var(--font); transition: all 0.15s; }
-    .analyse-btn:hover { background: var(--bg-secondary); }
-    .analyse-btn:active { transform: scale(0.98); }
-    .analyse-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-    .error-msg { font-size: 13px; color: var(--text-danger); margin-top: 8px; min-height: 20px; }
+    /* Confetti canvas */
+    #confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999}
 
-    .loading { display: none; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); }
-    .spinner { width: 15px; height: 15px; border: 2px solid var(--border-md); border-top-color: var(--text-secondary); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes shimmer { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
-
-    .results { display: none; margin-top: 1.5rem; }
-    .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-tertiary); margin: 1.5rem 0 0.75rem; }
-
-    .insight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-    .insight-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 1rem; }
-    .ic-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-    .ic-label { font-size: 12px; color: var(--text-secondary); }
-    .ic-change { font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 999px; }
-    .ic-change.up { background: var(--bg-success); color: var(--text-success); }
-    .ic-change.down { background: var(--bg-danger); color: var(--text-danger); }
-    .ic-change.neutral { background: var(--bg-secondary); color: var(--text-tertiary); border: 0.5px solid var(--border); }
-    .ic-content { font-size: 13px; color: var(--text-primary); line-height: 1.55; }
-
-    .skeleton-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 1rem; animation: shimmer 1.4s ease-in-out infinite; }
-    .skeleton-line { height: 10px; background: var(--skeleton); border-radius: 4px; margin-bottom: 8px; }
-    .skeleton-line.short { width: 40%; } .skeleton-line.med { width: 70%; } .skeleton-line.full { width: 100%; }
-
-    .chart-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; }
-    .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; font-size: 12px; color: var(--text-secondary); }
-    .legend-item { display: flex; align-items: center; gap: 5px; }
-    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-
-    .benchmarks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
-    .benchmark-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 1rem; }
-    .bm-metric { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
-    .bm-values { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
-    .bm-yours { font-size: 18px; font-weight: 500; color: var(--text-primary); }
-    .bm-avg { font-size: 12px; color: var(--text-tertiary); }
-    .bm-badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 999px; }
-    .bm-badge.above { background: var(--bg-success); color: var(--text-success); }
-    .bm-badge.below { background: var(--bg-danger); color: var(--text-danger); }
-    .bm-badge.on-par { background: var(--bg-warning); color: var(--text-warning); }
-    .bm-tier { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
-
-    .recs-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
-    .rec-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); align-items: flex-start; }
-    .rec-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .rec-num { font-size: 12px; font-weight: 500; color: var(--text-tertiary); min-width: 18px; padding-top: 1px; }
-    .rec-text { font-size: 13px; color: var(--text-primary); line-height: 1.6; }
-
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-    .cal-week-label { font-size: 11px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin: 0.75rem 0 0.4rem; grid-column: 1 / -1; }
-    .cal-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px 8px; min-height: 100px; }
-    .cal-day { font-size: 11px; font-weight: 500; color: var(--text-tertiary); margin-bottom: 5px; }
-    .cal-type { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 999px; display: inline-block; margin-bottom: 5px; background: var(--bg-info); color: var(--text-info); }
-    .cal-idea { font-size: 11px; color: var(--text-primary); line-height: 1.4; margin-bottom: 4px; font-weight: 500; }
-    .cal-rationale { font-size: 10px; color: var(--text-secondary); line-height: 1.4; }
-
-    .share-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: var(--bg); font-size: 13px; padding: 10px 18px; border-radius: var(--radius-md); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; white-space: nowrap; }
-    .share-toast.show { opacity: 1; }
-
-    footer { margin-top: 3rem; font-size: 12px; color: var(--text-tertiary); text-align: center; }
-
-    @media (max-width: 600px) {
-      .calendar-grid { grid-template-columns: repeat(3, 1fr); }
-      .inputs-grid { grid-template-columns: 1fr; }
-      .creator-grid { grid-template-columns: repeat(3, 1fr); }
+    @media(max-width:600px){
+      .hero h1{font-size:34px}
+      .how-grid{grid-template-columns:1fr}
+      .hero-stats{gap:1.5rem}
     }
   </style>
 </head>
 <body>
+<div class="mesh-bg">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="blur1"><feGaussianBlur stdDeviation="60"/></filter>
+      <filter id="blur2"><feGaussianBlur stdDeviation="80"/></filter>
+    </defs>
+    <rect width="1440" height="900" fill="transparent"/>
+    <ellipse class="blob" cx="200" cy="150" rx="380" ry="320" fill="rgba(139,124,248,0.22)" filter="url(#blur1)"/>
+    <ellipse class="blob" cx="1200" cy="120" rx="340" ry="280" fill="rgba(59,158,255,0.18)" filter="url(#blur1)"/>
+    <ellipse class="blob" cx="900" cy="600" rx="420" ry="340" fill="rgba(212,83,255,0.13)" filter="url(#blur2)"/>
+    <ellipse class="blob" cx="120" cy="750" rx="300" ry="260" fill="rgba(59,158,255,0.14)" filter="url(#blur2)"/>
+  </svg>
+</div>
+<canvas id="confetti-canvas"></canvas>
 <div class="page">
 
-  <div class="site-header">
-    <div>
-      <h1>Creator Analytics Hub</h1>
-      <p>AI-powered strategy insights for every kind of creator.</p>
-    </div>
-    <div class="header-actions">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:-.5rem;position:relative;z-index:2">
+    <div style="display:flex;gap:8px">
       <button class="icon-btn" id="share-btn" onclick="shareResults()" title="Share results" style="display:none;">&#8599;</button>
       <button class="icon-btn" id="pdf-btn" onclick="exportPDF()" title="Export PDF" style="display:none;">&#8681;</button>
       <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle dark mode">&#9788;</button>
     </div>
   </div>
 
-  <div class="step-card">
-    <p class="step-label">Step 1 — Who are you?</p>
-    <div class="creator-grid" id="creator-grid">
-      <button class="creator-btn active" onclick="selectCreator('music', this)"><span class="cb-icon">🎵</span>Music creator</button>
-      <button class="creator-btn" onclick="selectCreator('influencer', this)"><span class="cb-icon">✨</span>Influencer</button>
-      <button class="creator-btn" onclick="selectCreator('podcaster', this)"><span class="cb-icon">🎙</span>Podcaster</button>
-      <button class="creator-btn" onclick="selectCreator('youtuber', this)"><span class="cb-icon">▶</span>YouTuber</button>
-      <button class="creator-btn" onclick="selectCreator('brand', this)"><span class="cb-icon">◆</span>Brand</button>
+  <div class="hero">
+    <div class="hero-eyebrow"><div class="logo-dot"></div>AI-powered analytics</div>
+    <h1>Creator <em>Analytics</em><br>Hub</h1>
+    <p class="hero-sub">Paste your raw platform data and get AI strategy insights, benchmarks, and a 2-week content calendar — in seconds.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-num">5</span><span class="hero-stat-lbl">Creator types</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">10+</span><span class="hero-stat-lbl">Platforms supported</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">6</span><span class="hero-stat-lbl">Insight sections</span></div>
+    </div>
+    <div class="hero-scroll"><span class="hero-scroll-arr">↓</span><span>Get started below</span></div>
+  </div>
+
+  <div class="how-section">
+    <div class="how-grid">
+      <div class="how-card"><span class="how-step">Step 1</span><span class="how-icon">📋</span><div class="how-title">Paste your data</div><div class="how-desc">Copy your analytics from TikTok, Spotify, Instagram, YouTube, LinkedIn or Apple Podcasts.</div></div>
+      <div class="how-card"><span class="how-step">Step 2</span><span class="how-icon">🤖</span><div class="how-title">AI analyses it</div><div class="how-desc">Claude reads your numbers and benchmarks them against industry averages for your creator tier.</div></div>
+      <div class="how-card"><span class="how-step">Step 3</span><span class="how-icon">🚀</span><div class="how-title">Get your strategy</div><div class="how-desc">Receive audience insights, monetisation opportunities, growth recommendations and a content calendar.</div></div>
     </div>
   </div>
 
   <div class="step-card">
-    <p class="step-label">Step 2 — Which platform?</p>
-    <div class="platform-row" id="platform-row"></div>
+    <div class="step-pill"><div class="step-num">1</div>Who are you?</div>
+    <div class="creator-grid" id="creator-grid">
+      <button class="creator-btn active" onclick="selectCreator('music', this)"><span class="cb-icon">🎵</span>Music creator</button>
+      <button class="creator-btn" onclick="selectCreator('influencer', this)"><span class="cb-icon">✨</span>Influencer</button>
+      <button class="creator-btn" onclick="selectCreator('podcaster', this)"><span class="cb-icon">🎙</span>Podcaster</button>
+      <button class="creator-btn" onclick="selectCreator('youtuber', this)"><span class="cb-icon">🎬</span>YouTuber</button>
+      <button class="creator-btn" onclick="selectCreator('brand', this)"><span class="cb-icon">🏷</span>Brand</button>
+    </div>
+  </div>
 
-    <p class="step-label" style="margin-top:1rem;">Step 3 — Single period or compare?</p>
-    <div class="mode-row">
+  <div class="step-card">
+    <div class="step-pill" style="margin-top:2rem;"><div class="step-num">2</div>Which platform?</div>
+    <div class="platform-row" id="platform-row" style="margin-top:1rem;"></div>
+
+    <div class="step-pill" style="margin-top:1.5rem;"><div class="step-num">3</div>Single period or compare?</div>
+    <div class="mode-row" style="margin-top:0.75rem;display:flex;">
       <button class="mode-btn active" onclick="switchMode('single', this)">Single period</button>
       <button class="mode-btn" onclick="switchMode('comparison', this)">Compare periods</button>
     </div>
@@ -173,8 +271,17 @@
     <p class="hint" id="hint-text"></p>
     <div class="inputs-grid single" id="inputs-grid">
       <div class="input-col" id="col-a">
-        <label id="label-a">Paste your analytics data</label>
-        <textarea id="analytics-input" placeholder="Paste your analytics data here..."></textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <label id="label-a" style="margin-bottom:0">Paste your analytics data</label>
+          <button class="sample-btn" onclick="fillSampleData()">✦ Try sample data</button>
+        </div>
+        <div class="textarea-wrap">
+          <textarea id="analytics-input" placeholder="" oninput="checkEmpty()" onfocus="checkEmpty()"></textarea>
+          <div class="textarea-empty-hint" id="empty-hint">
+            <span class="teh-icon">📊</span>
+            <span class="teh-text">Paste your analytics data here,<br>or try the sample data above</span>
+          </div>
+        </div>
       </div>
       <div class="input-col" id="col-b" style="display:none;">
         <label>This month / newer period</label>
@@ -187,6 +294,20 @@
       <div class="loading" id="loading">
         <div class="spinner"></div>
         <span id="loading-text">Analysing your data...</span>
+      </div>
+    </div>
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-steps">
+        <div class="progress-step" id="ps0"><div class="progress-step-fill"></div></div>
+        <div class="progress-step" id="ps1"><div class="progress-step-fill"></div></div>
+        <div class="progress-step" id="ps2"><div class="progress-step-fill"></div></div>
+        <div class="progress-step" id="ps3"><div class="progress-step-fill"></div></div>
+      </div>
+      <div class="progress-labels">
+        <div class="progress-lbl" id="pl0">Reading data</div>
+        <div class="progress-lbl" id="pl1">Finding patterns</div>
+        <div class="progress-lbl" id="pl2">Building insights</div>
+        <div class="progress-lbl" id="pl3">Creating calendar</div>
       </div>
     </div>
     <p class="error-msg" id="error-msg"></p>
@@ -218,7 +339,7 @@
     <div class="calendar-grid" id="calendar-grid"></div>
   </div>
 
-  <footer>Creator Analytics Hub</footer>
+  <footer>Creator Analytics Hub &mdash; built with <em>Claude API</em> by Yamina</footer>
 </div>
 
 <div class="share-toast" id="share-toast">Link copied to clipboard</div>
@@ -374,6 +495,70 @@ function showSkeletons() {
 
 const loadingMsgs = ['Analysing your data...','Identifying patterns...','Generating insights...','Building your calendar...'];
 let loadingInterval;
+const PROGRESS_STEPS = ['Reading data','Finding patterns','Building insights','Creating calendar'];
+
+function checkEmpty() {
+  const ta = document.getElementById('analytics-input');
+  const hint = document.getElementById('empty-hint');
+  if (hint) hint.classList.toggle('hidden', ta.value.length > 0);
+}
+
+function fillSampleData() {
+  const samples = {
+    music: { TikTok: "Followers: 24,800 (+1,240 this week)\nTotal views: 2,400,000\nAvg watch time: 11.4s\nCompletion rate: 38%\nTop video: 'Behind the track' — 420K views, 62% completion\nTop video: 'POV: 3am studio session' — 198K views\nAudience: 71% female, 18-24 (54%), 25-34 (28%)\nLocations: UK (38%), US (29%), Australia (9%)\nTraffic: For You Page (79%), Following (12%), Search (6%)\nPosting: 4x per week, best times 7-9pm weekdays", 'Spotify for Artists': "Monthly listeners: 8,200\nTotal streams: 124,500\nSaves rate: 14%\nPlaylist adds: 340\nFollowers: 1,890\nTop track: 'Late nights' — 32K streams\nTop track: 'Golden hour' — 18K streams\nAudience: 18-24 (38%), 25-34 (34%), UK (44%), US (22%)\nDiscovery: Algorithmic playlists (52%), Search (24%), Listener profiles (14%)", Instagram: "Followers: 9,800\nReach: 42,000\nImpressions: 98,000\nTop reel: 'Studio session vlog' — 28K plays\nSaves: 1,240\nEngagement rate: 4.2%\nAudience: 18-24 (44%), 25-34 (32%), UK (52%), US (21%)\nBest content: Reels (72% of reach)" },
+    influencer: { Instagram: "Followers: 48,200\nReach: 186,000\nEngagement rate: 3.4%\nTop reel: 'Morning routine' — 94K plays\nSaves: 4,200\nStory views avg: 3,100\nAudience: 72% female, 25-34 (41%), 18-24 (34%), UK (44%), US (28%)\nBest content: Reels (68% of reach), Carousels (22%)", TikTok: "Followers: 92,400\nTotal views: 8,200,000\nAvg watch time: 14.2s\nCompletion rate: 44%\nTop video: 'GRWM for date night' — 1.2M views\nAudience: 79% female, 18-24 (61%), UK (42%)\nTraffic: FYP (82%), Following (11%)", YouTube: "Subscribers: 34,500\nTotal views: 2,100,000\nWatch time: 98,000 hours\nCTR: 4.2%\nAvg view duration: 8m 42s\nTop video: 'Week in my life' — 180K views\nRPM: £3.80\nAudience: 62% female, 25-34 (38%), UK (48%)" },
+    podcaster: { Spotify: "Listeners/episode (avg): 3,400\nTotal streams: 87,000\nFollowers: 8,200\nCompletion rate: 62%\nTop episode: 'EP 42 — AI in music' — 9,800 plays\nTop episode: 'EP 38 — Streaming economics' — 8,400 plays\nAudience: 55% male, 25-34 (48%), 35-44 (28%), UK (52%), US (24%)\nDiscovery: Search (44%), Algorithmic (32%), Social (18%)", 'Apple Podcasts': "Listeners/episode: 2,100\nTotal plays: 54,000\nFollowers: 4,800\nCompletion rate: 58%\nRating: 4.7 (312 reviews)\nTop episode: 'EP 42' — 5,400 plays\nAudience: 58% male, 25-34 (44%), UK (48%)", YouTube: "Subscribers: 12,400\nTotal views: 640,000\nAvg view duration: 24m 10s\nCTR: 3.8%\nTop episode: 'AI in music' — 48K views\nAudience: 58% male, 25-34 (44%)" },
+    youtuber: { YouTube: "Subscribers: 128,000\nTotal views: 14,200,000\nWatch time: 890,000 hours\nCTR: 3.6%\nAvg view duration: 11m 24s\nTop video: 'I tried every streaming service' — 840K views\nTop video: 'My entire studio setup' — 420K views\nRPM: £4.20\nAudience: 62% male, 18-24 (38%), 25-34 (34%), UK (34%), US (28%)\nTraffic: Browse (42%), Search (28%), Suggested (22%)", Instagram: "Followers: 28,400\nReach: 94,000\nEngagement rate: 2.8%\nTop reel: 'My studio setup' — 42K plays\nAudience: 58% male, 18-24 (46%)", TikTok: "Followers: 64,200\nTotal views: 5,800,000\nAvg watch time: 12.8s\nTop video: 'Budget vs expensive mic' — 2.1M views\nAudience: 61% male, 18-24 (52%)" },
+    brand: { Instagram: "Followers: 24,800\nReach: 142,000\nImpressions: 380,000\nEngagement rate: 2.1%\nWebsite clicks: 4,200\nTop post: 'New drop announcement' — 8,400 likes\nTop reel: 'Behind the brand' — 62K plays\nAudience: 68% female, 25-34 (38%), 18-24 (28%), UK (41%), US (32%)\nBest content: Reels (58% of reach), Stories (24%)", TikTok: "Followers: 18,400\nTotal views: 3,200,000\nEngagement rate: 3.8%\nTop video: 'Behind the brand' — 840K views\nWebsite clicks: 2,100\nAudience: 71% female, 18-24 (52%), UK (38%)", LinkedIn: "Followers: 12,400\nImpressions: 84,000\nEngagement rate: 3.2%\nClicks: 1,800\nTop post: 'We just hit 1M users' — 4,200 impressions\nAudience: Marketing (28%), C-Suite (14%), Engineering (18%), UK (48%), US (28%)" }
+  };
+  const sample = samples[currentCreator]?.[currentPlatform];
+  if (sample) {
+    document.getElementById('analytics-input').value = sample;
+    checkEmpty();
+  }
+}
+
+function setProgress(step) {
+  for (let i = 0; i < 4; i++) {
+    const ps = document.getElementById('ps' + i);
+    const pl = document.getElementById('pl' + i);
+    ps.className = 'progress-step' + (i < step ? ' done' : i === step ? ' active' : '');
+    pl.className = 'progress-lbl' + (i < step ? ' done' : i === step ? ' active' : '');
+  }
+}
+
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = [];
+  const colours = ['#8b7cf8','#3b9eff','#f472b6','#2dd4bf','#fbbf24','#c2b9ff'];
+  for (let i = 0; i < 90; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width, y: -10 - Math.random() * 100,
+      w: 6 + Math.random() * 8, h: 4 + Math.random() * 5,
+      r: Math.random() * Math.PI * 2, rd: (Math.random() - .5) * .15,
+      vx: (Math.random() - .5) * 3, vy: 2 + Math.random() * 3,
+      colour: colours[Math.floor(Math.random() * colours.length)], alpha: 1
+    });
+  }
+  let frame;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.r += p.rd; p.vy += .05; p.alpha -= .008;
+      if (p.alpha <= 0) return;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.globalAlpha = p.alpha; ctx.fillStyle = p.colour;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    if (pieces.some(p => p.alpha > 0)) frame = requestAnimationFrame(draw);
+    else { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+  }
+  draw();
+}
 
 async function analyse() {
   const input = document.getElementById('analytics-input').value.trim();
@@ -384,12 +569,15 @@ async function analyse() {
   document.getElementById('error-msg').textContent = '';
   document.getElementById('analyse-btn').disabled = true;
   document.getElementById('loading').style.display = 'flex';
+  document.getElementById('progress-wrap').style.display = 'flex';
+  setProgress(0);
   showSkeletons();
 
   let msgIdx = 0;
   loadingInterval = setInterval(() => {
     msgIdx = (msgIdx + 1) % loadingMsgs.length;
     document.getElementById('loading-text').textContent = loadingMsgs[msgIdx];
+    setProgress(msgIdx);
   }, 1800);
 
   try {
@@ -411,6 +599,7 @@ async function analyse() {
   } finally {
     clearInterval(loadingInterval);
     document.getElementById('loading').style.display = 'none';
+    document.getElementById('progress-wrap').style.display = 'none';
     document.getElementById('loading-text').textContent = loadingMsgs[0];
     document.getElementById('analyse-btn').disabled = false;
   }
@@ -425,7 +614,23 @@ function renderResults(data) {
   if (data.calendar) renderCalendar(data.calendar);
   document.getElementById('recs-list').innerHTML = (data.recommendations || []).map((r, i) =>
     `<div class="rec-item"><span class="rec-num">${i+1}</span><span class="rec-text">${r}</span></div>`).join('');
+  setProgress(4);
+  animateCards();
+  setTimeout(launchConfetti, 400);
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function animateCards() {
+  const cards = document.querySelectorAll('.insight-card, .benchmark-card, .cal-card');
+  cards.forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(12px)';
+    setTimeout(() => {
+      card.style.transition = 'opacity .35s ease, transform .35s ease';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, i * 40);
+  });
 }
 
 function renderGrid(id, items) {
@@ -455,7 +660,7 @@ function renderChart(chartData) {
   if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
   const ctx = document.getElementById('myChart').getContext('2d');
   const legend = document.getElementById('chart-legend');
-  const cA = '#378ADD', cB = '#1D9E75';
+  const cA = '#8b7cf8', cB = '#3b9eff';
   if (chartData.dataA && chartData.dataB) {
     legend.innerHTML = `<span class="legend-item"><span class="legend-dot" style="background:${cA}"></span>${chartData.periodA||'Period A'}</span><span class="legend-item"><span class="legend-dot" style="background:${cB}"></span>${chartData.periodB||'Period B'} — ${chartData.unit||''}</span>`;
     chartInstance = new Chart(ctx, { type:'bar', data:{ labels:chartData.labels, datasets:[{label:chartData.periodA,data:chartData.dataA,backgroundColor:cA,borderRadius:4},{label:chartData.periodB,data:chartData.dataB,backgroundColor:cB,borderRadius:4}] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false},ticks:{color:'#9b9b96',font:{size:11}}}, y:{grid:{color:'rgba(128,128,128,0.12)'},ticks:{color:'#9b9b96',font:{size:11}}} } } });
