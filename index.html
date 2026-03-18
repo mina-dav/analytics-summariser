@@ -842,22 +842,19 @@ function handleCsvFile(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
     const text = e.target.result;
-    const lines = text.split('
-').filter(l => l.trim());
-    // Extract key-value pairs from CSV rows
+    const lines = text.split('\n').filter(l => l.trim());
     let parsed = '';
     lines.forEach(line => {
       const cols = line.split(',').map(c => c.replace(/"/g,'').trim());
       if (cols.length >= 2 && cols[0] && cols[1] && isNaN(cols[0][0])) {
-        parsed += `${cols[0]}: ${cols[1]}
-`;
+        parsed += cols[0] + ': ' + cols[1] + '\n';
       }
     });
     if (parsed.length > 20) {
       document.getElementById('analytics-input').value = parsed.trim();
       document.getElementById('csv-parsed-badge').style.display = 'inline-flex';
       document.getElementById('csv-drop-zone').style.display = 'none';
-      document.getElementById('csv-toggle-btn').textContent = '⬆ Upload CSV instead';
+      document.getElementById('csv-toggle-btn').textContent = '\u2B06 Upload CSV instead';
       checkEmpty();
     }
   };
