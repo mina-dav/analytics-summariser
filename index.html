@@ -167,10 +167,8 @@
     .sample-btn:hover{background:var(--p100);border-color:var(--p200)}
 
     /* Empty state textarea */
-    .textarea-wrap{position:relative}
-    .textarea-empty-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
-    .teh-icon{font-size:24px;display:block;margin-bottom:6px;opacity:.4}
-    .teh-text{font-size:12px;color:var(--text-tertiary);white-space:nowrap}
+
+
 
     /* Progress bar */
     .progress-wrap{display:none;flex-direction:column;gap:10px;width:100%;margin-top:1rem}
@@ -323,13 +321,7 @@
           <label id="label-a" style="margin-bottom:0">Paste your analytics data</label>
           <button class="sample-btn" onclick="fillSampleData()">✦ Try sample data</button>
         </div>
-        <div class="textarea-wrap">
-          <textarea id="analytics-input" placeholder="" oninput="checkEmpty()" onfocus="checkEmpty()"></textarea>
-          <div class="textarea-empty-hint" id="empty-hint">
-            <span class="teh-icon">📊</span>
-            <span class="teh-text">Paste your analytics data here,<br>or try the sample data above</span>
-          </div>
-        </div>
+        <textarea id="analytics-input" placeholder="Paste your analytics data here, or click Try sample data above..."></textarea>
       </div>
       <div class="input-col" id="col-b" style="display:none;">
         <label>This month / newer period</label>
@@ -564,11 +556,7 @@ const loadingMsgs = ['Analysing your data...','Identifying patterns...','Generat
 let loadingInterval;
 const PROGRESS_STEPS = ['Reading data','Finding patterns','Building insights','Creating calendar'];
 
-function checkEmpty() {
-  const ta = document.getElementById('analytics-input');
-  const hint = document.getElementById('empty-hint');
-  if (hint) hint.style.display = ta.value.length > 0 ? 'none' : 'block';
-}
+function checkEmpty() {}
 
 function fillSampleData() {
   const samples = {
@@ -904,7 +892,6 @@ function renderTrends(trends) {
 
 window.addEventListener('load', () => {
   renderPlatforms();
-  checkEmpty();
   const params = new URLSearchParams(window.location.search);
   const r = params.get('r');
   if (r) {
