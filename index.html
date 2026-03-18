@@ -51,7 +51,7 @@
     .header-actions{display:flex;gap:8px;flex-shrink:0;padding-top:4px}
     .icon-btn{width:36px;height:36px;border-radius:var(--radius-md);border:1px solid var(--border-md);background:var(--surface);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;box-shadow:var(--sh)}
     .icon-btn:hover{background:var(--p50);color:var(--p600);border-color:var(--p200);transform:translateY(-1px)}
-    .card,.step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:1.5rem;margin-bottom:1rem;box-shadow:var(--sh)}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:1.5rem;margin-bottom:1rem;box-shadow:var(--sh)}
     .step-pill{display:inline-flex;align-items:center;gap:7px;background:var(--p50);border-radius:999px;padding:4px 12px 4px 5px;font-family:var(--font-display);font-size:10px;font-weight:700;color:var(--p600);letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.1rem}
     .step-num{width:20px;height:20px;background:var(--p500);border-radius:50%;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
     .creator-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
@@ -707,8 +707,9 @@ function renderGrid(id, items) {
   if (!items) return;
   document.getElementById(id).innerHTML = items.map(item => {
     const hasChange = item.change && item.changeText;
-    const action = item.action ? `<div class="ic-action"><span class="ic-action-arrow">→</span>${item.action}</div>` : '';
-    return `<div class="insight-card"><div class="ic-header"><span class="ic-label">${item.label}</span>${hasChange ? `<span class="ic-change ${item.change}">${item.changeText}</span>` : ''}</div><div class="ic-content">${item.insight}</div>${action}</div>`;
+    const changeBadge = hasChange ? '<span class="ic-change ' + item.change + '">' + item.changeText + '</span>' : '';
+    const action = item.action ? '<div class="ic-action"><span class="ic-action-arrow">\u2192</span>' + item.action + '</div>' : '';
+    return '<div class="insight-card"><div class="ic-header"><span class="ic-label">' + item.label + '</span>' + changeBadge + '</div><div class="ic-content">' + item.insight + '</div>' + action + '</div>';
   }).join('');
 }
 
