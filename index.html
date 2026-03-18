@@ -168,8 +168,7 @@
 
     /* Empty state textarea */
     .textarea-wrap{position:relative}
-    .textarea-empty-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;transition:opacity .2s}
-    .textarea-empty-hint.hidden{opacity:0}
+    .textarea-empty-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;}
     .teh-icon{font-size:24px;display:block;margin-bottom:6px;opacity:.4}
     .teh-text{font-size:12px;color:var(--text-tertiary);white-space:nowrap}
 
@@ -568,7 +567,7 @@ const PROGRESS_STEPS = ['Reading data','Finding patterns','Building insights','C
 function checkEmpty() {
   const ta = document.getElementById('analytics-input');
   const hint = document.getElementById('empty-hint');
-  if (hint) hint.classList.toggle('hidden', ta.value.length > 0);
+  if (hint) hint.style.display = ta.value.length > 0 ? 'none' : 'block';
 }
 
 function fillSampleData() {
@@ -905,6 +904,7 @@ function renderTrends(trends) {
 
 window.addEventListener('load', () => {
   renderPlatforms();
+  checkEmpty();
   const params = new URLSearchParams(window.location.search);
   const r = params.get('r');
   if (r) {
