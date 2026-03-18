@@ -200,6 +200,47 @@
       .how-grid{grid-template-columns:1fr}
       .hero-stats{gap:1.5rem}
     }
+
+    /* Health score */
+    .health-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:1.5rem;box-shadow:var(--sh);display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
+    .health-score-ring{position:relative;width:110px;height:110px;flex-shrink:0}
+    .health-score-ring svg{transform:rotate(-90deg)}
+    .health-score-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .health-score-num{font-family:var(--font-display);font-size:28px;font-weight:800;color:var(--text-primary);line-height:1}
+    .health-score-lbl{font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+    .health-details{flex:1;min-width:200px}
+    .health-grade{display:inline-block;font-family:var(--font-display);font-size:13px;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:10px}
+    .health-grade.great{background:#eaf3de;color:#3b6d11}
+    .health-grade.good{background:var(--p50);color:var(--p600)}
+    .health-grade.fair{background:#faeeda;color:#854f0b}
+    .health-grade.poor{background:#fcebeb;color:#a32d2d}
+    .health-bars{display:flex;flex-direction:column;gap:8px}
+    .health-bar-row{display:flex;align-items:center;gap:10px}
+    .health-bar-label{font-size:11px;color:var(--text-secondary);min-width:100px}
+    .health-bar-track{flex:1;height:6px;background:var(--surface2);border-radius:999px;overflow:hidden}
+    .health-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--p400),var(--b400));transition:width .8s ease}
+    .health-bar-val{font-size:11px;font-weight:600;color:var(--text-primary);min-width:28px;text-align:right}
+
+    /* Action cards (so what layer) */
+    .insight-card .ic-action{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--p600);font-weight:500;display:flex;align-items:flex-start;gap:5px;line-height:1.5}
+    .ic-action-arrow{flex-shrink:0;font-size:11px}
+
+    /* Trend arrows on chart */
+    .trend-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+    .trend-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--surface2)}
+    .trend-chip.up{background:#eaf3de;color:#3b6d11}
+    .trend-chip.down{background:#fcebeb;color:#a32d2d}
+    .trend-chip.flat{background:var(--p50);color:var(--p600)}
+
+    /* CSV parser */
+    .csv-toggle{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text-tertiary);background:transparent;border:1px dashed var(--border-md);border-radius:999px;padding:4px 12px;cursor:pointer;transition:all .2s;font-family:var(--font);margin-bottom:8px}
+    .csv-toggle:hover{color:var(--p600);border-color:var(--p200);background:var(--p50)}
+    .csv-drop{display:none;border:2px dashed var(--border-md);border-radius:var(--radius-md);padding:2rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:10px;background:var(--surface2)}
+    .csv-drop.active,.csv-drop:hover{border-color:var(--p400);background:var(--p50)}
+    .csv-drop-icon{font-size:24px;display:block;margin-bottom:8px}
+    .csv-drop-text{font-size:13px;color:var(--text-secondary)}
+    .csv-drop-sub{font-size:11px;color:var(--text-tertiary);margin-top:4px}
+    .csv-parsed-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--text-success);background:var(--bg-success);border-radius:999px;padding:4px 12px;margin-bottom:8px}
   </style>
 </head>
 <body>
@@ -271,6 +312,14 @@
     <p class="hint" id="hint-text"></p>
     <div class="inputs-grid single" id="inputs-grid">
       <div class="input-col" id="col-a">
+        <button class="csv-toggle" onclick="toggleCsv()" id="csv-toggle-btn">⬆ Upload CSV instead</button>
+        <div id="csv-drop-zone" class="csv-drop" onclick="document.getElementById('csv-file-input').click()" ondrop="handleCsvDrop(event)" ondragover="event.preventDefault();this.classList.add('active')" ondragleave="this.classList.remove('active')">
+          <input type="file" id="csv-file-input" accept=".csv" style="display:none" onchange="handleCsvFile(this.files[0])">
+          <span class="csv-drop-icon">📂</span>
+          <div class="csv-drop-text">Drop your CSV export here, or click to browse</div>
+          <div class="csv-drop-sub">TikTok, Spotify for Artists, Instagram — any platform CSV export</div>
+        </div>
+        <div id="csv-parsed-badge" class="csv-parsed-badge" style="display:none">✓ CSV parsed — data loaded below</div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
           <label id="label-a" style="margin-bottom:0">Paste your analytics data</label>
           <button class="sample-btn" onclick="fillSampleData()">✦ Try sample data</button>
@@ -314,6 +363,22 @@
   </div>
 
   <div class="results" id="results">
+    <p class="section-label">Creator health score</p>
+    <div class="health-card" id="health-card">
+      <div class="health-score-ring">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="var(--surface2)" stroke-width="10"/>
+          <circle id="health-ring" cx="55" cy="55" r="46" fill="none" stroke="url(#healthGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289"/>
+          <defs><linearGradient id="healthGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8b7cf8"/><stop offset="100%" stop-color="#3b9eff"/></linearGradient></defs>
+        </svg>
+        <div class="health-score-inner"><span class="health-score-num" id="health-num">—</span><span class="health-score-lbl">/ 100</span></div>
+      </div>
+      <div class="health-details">
+        <span class="health-grade" id="health-grade">Calculating...</span>
+        <div class="health-bars" id="health-bars"></div>
+      </div>
+    </div>
+
     <p class="section-label">Audience &amp; demographics</p>
     <div class="insight-grid" id="audience-grid"></div>
 
@@ -326,6 +391,7 @@
       <div style="position:relative;width:100%;height:260px;"><canvas id="myChart"></canvas></div>
     </div>
 
+    <div class="trend-row" id="trend-row"></div>
     <p class="section-label">Benchmarks vs industry averages</p>
     <div class="benchmarks-grid" id="benchmarks-grid"></div>
 
@@ -339,7 +405,7 @@
     <div class="calendar-grid" id="calendar-grid"></div>
   </div>
 
-  <footer>Creator Analytics Hub &mdash; by Yamina</footer>
+  <footer>Creator Analytics Hub &mdash; built with <em>Claude API</em> by Yamina</footer>
 </div>
 
 <div class="share-toast" id="share-toast">Link copied to clipboard</div>
@@ -348,14 +414,16 @@
 const CREATOR_CONFIG = {
   music: {
     label: 'Music Creator',
-    platforms: ['TikTok', 'Spotify for Artists', 'Instagram'],
+    platforms: ['TikTok', 'TikTok LIVE', 'Spotify for Artists', 'Instagram'],
     hints: {
       'TikTok': 'Include: views, followers, likes, comments, shares, watch time, completion rate, top videos, audience demographics, traffic sources.',
       'Spotify for Artists': 'Include: monthly listeners, total streams, saves rate, playlist adds, follower count, top tracks, audience demographics, discovery sources.',
+      'TikTok LIVE': 'Include: peak concurrent viewers, total viewers, diamonds earned, new followers from LIVE, avg LIVE duration, gifts received, top gifters, chat engagement rate, LIVE sessions per week.',
       'Instagram': 'Include: followers, reach, impressions, profile visits, likes, comments, saves, reel plays, story views, top posts, audience demographics.'
     },
     placeholders: {
       'TikTok': "Followers: 24,800\nTotal views: 2,400,000\nAvg watch time: 11.4s\nCompletion rate: 38%\nAudience: 71% female, 18-24 (54%), UK (38%)\nTraffic: For You Page (79%)",
+      'TikTok LIVE': "Peak concurrent viewers: 2,840\nTotal viewers (last 30 days): 48,200\nLIVE sessions: 12\nAvg session duration: 48 mins\nNew followers from LIVE: 1,240\nDiamonds earned: 84,200\nGifts received: 3,400\nTop gift: Rose (1,200x)\nChat messages per session avg: 4,800\nAudience: 68% female, 18-24 (52%), UK (41%), US (28%)\nBest performing day: Friday 8pm — 4,200 peak viewers",
       'Spotify for Artists': "Monthly listeners: 8,200\nTotal streams: 124,500\nSaves rate: 14%\nPlaylist adds: 340\nTop track: 'Late nights' — 32K streams\nAudience: 18-24 (38%), UK (44%)",
       'Instagram': "Followers: 9,800\nReach: 42,000\nTop reel: 'Studio session' — 28K plays\nAudience: 18-24 (44%), UK (52%)\nBest content: Reels (72% of reach)"
     }
@@ -612,6 +680,8 @@ function renderResults(data) {
   if (data.benchmarks) renderBenchmarks(data.benchmarks);
   if (data.chart) renderChart(data.chart);
   if (data.calendar) renderCalendar(data.calendar);
+  if (data.healthScore) renderHealthScore(data.healthScore, data.healthBreakdown);
+  if (data.trends) renderTrends(data.trends);
   document.getElementById('recs-list').innerHTML = (data.recommendations || []).map((r, i) =>
     `<div class="rec-item"><span class="rec-num">${i+1}</span><span class="rec-text">${r}</span></div>`).join('');
   setProgress(4);
@@ -637,7 +707,8 @@ function renderGrid(id, items) {
   if (!items) return;
   document.getElementById(id).innerHTML = items.map(item => {
     const hasChange = item.change && item.changeText;
-    return `<div class="insight-card"><div class="ic-header"><span class="ic-label">${item.label}</span>${hasChange ? `<span class="ic-change ${item.change}">${item.changeText}</span>` : ''}</div><div class="ic-content">${item.insight}</div></div>`;
+    const action = item.action ? `<div class="ic-action"><span class="ic-action-arrow">→</span>${item.action}</div>` : '';
+    return `<div class="insight-card"><div class="ic-header"><span class="ic-label">${item.label}</span>${hasChange ? `<span class="ic-change ${item.change}">${item.changeText}</span>` : ''}</div><div class="ic-content">${item.insight}</div>${action}</div>`;
   }).join('');
 }
 
@@ -748,6 +819,90 @@ function exportPDF() {
   doc.setFontSize(9); doc.setTextColor(155,155,150);
   doc.text('Generated by Creator Analytics Hub — built with Claude API', margin, y);
   doc.save(`creator-analytics-${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
+function toggleCsv() {
+  const zone = document.getElementById('csv-drop-zone');
+  const btn = document.getElementById('csv-toggle-btn');
+  const showing = zone.style.display === 'block';
+  zone.style.display = showing ? 'none' : 'block';
+  btn.textContent = showing ? '⬆ Upload CSV instead' : '✕ Close CSV upload';
+}
+
+function handleCsvDrop(e) {
+  e.preventDefault();
+  document.getElementById('csv-drop-zone').classList.remove('active');
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.csv')) handleCsvFile(file);
+}
+
+function handleCsvFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    const lines = text.split('
+').filter(l => l.trim());
+    // Extract key-value pairs from CSV rows
+    let parsed = '';
+    lines.forEach(line => {
+      const cols = line.split(',').map(c => c.replace(/"/g,'').trim());
+      if (cols.length >= 2 && cols[0] && cols[1] && isNaN(cols[0][0])) {
+        parsed += `${cols[0]}: ${cols[1]}
+`;
+      }
+    });
+    if (parsed.length > 20) {
+      document.getElementById('analytics-input').value = parsed.trim();
+      document.getElementById('csv-parsed-badge').style.display = 'inline-flex';
+      document.getElementById('csv-drop-zone').style.display = 'none';
+      document.getElementById('csv-toggle-btn').textContent = '⬆ Upload CSV instead';
+      checkEmpty();
+    }
+  };
+  reader.readAsText(file);
+}
+
+function renderHealthScore(score, breakdown) {
+  if (!score) return;
+  const num = Math.round(score);
+  const circumference = 289;
+  const offset = circumference - (num / 100) * circumference;
+  document.getElementById('health-num').textContent = num;
+  setTimeout(() => {
+    document.getElementById('health-ring').style.transition = 'stroke-dashoffset 1.2s ease';
+    document.getElementById('health-ring').style.strokeDashoffset = offset;
+  }, 100);
+  const gradeEl = document.getElementById('health-grade');
+  let grade, cls;
+  if (num >= 75) { grade = 'Strong performance'; cls = 'great'; }
+  else if (num >= 55) { grade = 'Good momentum'; cls = 'good'; }
+  else if (num >= 35) { grade = 'Room to grow'; cls = 'fair'; }
+  else { grade = 'Needs attention'; cls = 'poor'; }
+  gradeEl.textContent = grade; gradeEl.className = 'health-grade ' + cls;
+  if (breakdown && breakdown.length) {
+    document.getElementById('health-bars').innerHTML = breakdown.map(b =>
+      `<div class="health-bar-row">
+        <span class="health-bar-label">${b.label}</span>
+        <div class="health-bar-track"><div class="health-bar-fill" style="width:0%" data-val="${b.score}"></div></div>
+        <span class="health-bar-val">${Math.round(b.score)}</span>
+      </div>`
+    ).join('');
+    setTimeout(() => {
+      document.querySelectorAll('.health-bar-fill').forEach(el => {
+        el.style.transition = 'width 1s ease';
+        el.style.width = el.dataset.val + '%';
+      });
+    }, 200);
+  }
+}
+
+function renderTrends(trends) {
+  const row = document.getElementById('trend-row');
+  if (!trends || !trends.length) { row.innerHTML = ''; return; }
+  row.innerHTML = trends.map(t =>
+    `<span class="trend-chip ${t.direction}">${t.direction === 'up' ? '↑' : t.direction === 'down' ? '↓' : '→'} ${t.label}: ${t.value}</span>`
+  ).join('');
 }
 
 window.addEventListener('load', () => {
