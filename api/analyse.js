@@ -102,7 +102,7 @@ export default async function handler(req, res) {
     {"metric":"string","yourValue":"string","benchmark":"string","status":"above|below|on-par","tier":"string"},
     {"metric":"string","yourValue":"string","benchmark":"string","status":"above|below|on-par","tier":"string"}
   ],
-  "chart": {"type":"bar","title":"string","labels":["string","string","string","string","string"]${isComparison ? ',"periodA":"string","periodB":"string","dataA":[number,number,number,number],"dataB":[number,number,number,number]' : ',"data":[number,number,number,number,number]'},"unit":"string"}
+  "chart": {"type":"bar","title":"string","labels":["string","string","string","string"]${isComparison ? ',"periodA":"string","periodB":"string","dataA":[number,number,number,number],"dataB":[number,number,number,number]' : ',"data":[number,number,number,number]'},"unit":"string — IMPORTANT: all values in this chart MUST use the same unit and be on the same scale. Never mix followers (30000) with engagement rate (5) or percentages with raw counts. Pick ONE metric type: either all percentages, all follower/reach counts in same K unit, or all engagement numbers. If comparing periods, normalise both datasets to the same unit (e.g. both in thousands)."}
 }`;
 
   const userPrompt = isComparison
