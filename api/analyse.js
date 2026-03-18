@@ -3,6 +3,7 @@ const CREATOR_CONFIG = {
     name: 'Music Creator',
     platforms: ['TikTok', 'Spotify for Artists', 'Instagram'],
     benchmarks: {
+      'tiktok-live': { nano: { label: '<500 peak viewers', peakViewers: 180, newFollowers: 40, diamondRate: 0.8 }, micro: { label: '500–2K peak viewers', peakViewers: 900, newFollowers: 180, diamondRate: 2.4 }, mid: { label: '2K–10K peak viewers', peakViewers: 4200, newFollowers: 640, diamondRate: 8.2 }, macro: { label: '10K+ peak viewers', peakViewers: 18000, newFollowers: 2400, diamondRate: 28 } },
       tiktok: { nano: { label: '1K–10K followers', avgWatchTime: 6, completionRate: 28, engagementRate: 4.5, fypTraffic: 65 }, micro: { label: '10K–50K followers', avgWatchTime: 8, completionRate: 32, engagementRate: 3.8, fypTraffic: 70 }, mid: { label: '50K–200K followers', avgWatchTime: 9, completionRate: 35, engagementRate: 3.2, fypTraffic: 74 }, macro: { label: '200K+ followers', avgWatchTime: 10, completionRate: 38, engagementRate: 2.5, fypTraffic: 78 } },
       spotify: { nano: { label: '0–5K listeners', savesRate: 8, playlistAddRate: 3 }, micro: { label: '5K–20K listeners', savesRate: 11, playlistAddRate: 5 }, mid: { label: '20K–100K listeners', savesRate: 14, playlistAddRate: 7 }, macro: { label: '100K+ listeners', savesRate: 18, playlistAddRate: 10 } },
       instagram: { nano: { label: '1K–10K followers', engagementRate: 4.2, reachRate: 28 }, micro: { label: '10K–50K followers', engagementRate: 3.1, reachRate: 22 }, mid: { label: '50K–200K followers', engagementRate: 2.4, reachRate: 18 }, macro: { label: '200K+ followers', engagementRate: 1.8, reachRate: 14 } }
@@ -13,6 +14,7 @@ const CREATOR_CONFIG = {
     platforms: ['Instagram', 'TikTok', 'YouTube'],
     benchmarks: {
       instagram: { nano: { label: '1K–10K followers', engagementRate: 5.1, reachRate: 30, storyViews: 8 }, micro: { label: '10K–50K followers', engagementRate: 3.6, reachRate: 24, storyViews: 6 }, mid: { label: '50K–200K followers', engagementRate: 2.8, reachRate: 19, storyViews: 4.5 }, macro: { label: '200K+ followers', engagementRate: 2.0, reachRate: 15, storyViews: 3 } },
+      'tiktok-live': { nano: { label: '<500 peak viewers', peakViewers: 180, newFollowers: 40, diamondRate: 0.8 }, micro: { label: '500–2K peak viewers', peakViewers: 900, newFollowers: 180, diamondRate: 2.4 }, mid: { label: '2K–10K peak viewers', peakViewers: 4200, newFollowers: 640, diamondRate: 8.2 }, macro: { label: '10K+ peak viewers', peakViewers: 18000, newFollowers: 2400, diamondRate: 28 } },
       tiktok: { nano: { label: '1K–10K followers', engagementRate: 5.5, completionRate: 30, fypTraffic: 62 }, micro: { label: '10K–50K followers', engagementRate: 4.2, completionRate: 33, fypTraffic: 68 }, mid: { label: '50K–200K followers', engagementRate: 3.4, completionRate: 36, fypTraffic: 73 }, macro: { label: '200K+ followers', engagementRate: 2.6, completionRate: 39, fypTraffic: 77 } },
       youtube: { nano: { label: '1K–10K subs', ctr: 4.0, avgViewDuration: 35, engagementRate: 3.2 }, micro: { label: '10K–50K subs', ctr: 3.4, avgViewDuration: 38, engagementRate: 2.8 }, mid: { label: '50K–200K subs', ctr: 3.0, avgViewDuration: 40, engagementRate: 2.4 }, macro: { label: '200K+ subs', ctr: 2.6, avgViewDuration: 42, engagementRate: 1.9 } }
     }
@@ -32,6 +34,7 @@ const CREATOR_CONFIG = {
     benchmarks: {
       youtube: { nano: { label: '1K–10K subs', ctr: 4.2, avgViewDuration: 33, engagementRate: 3.5, revenueRPM: 2.5 }, micro: { label: '10K–50K subs', ctr: 3.6, avgViewDuration: 37, engagementRate: 3.0, revenueRPM: 3.2 }, mid: { label: '50K–500K subs', ctr: 3.1, avgViewDuration: 40, engagementRate: 2.5, revenueRPM: 4.1 }, macro: { label: '500K+ subs', ctr: 2.7, avgViewDuration: 43, engagementRate: 2.0, revenueRPM: 5.8 } },
       instagram: { nano: { label: '1K–10K followers', engagementRate: 4.2, reachRate: 28 }, micro: { label: '10K–50K followers', engagementRate: 3.1, reachRate: 22 }, mid: { label: '50K–200K followers', engagementRate: 2.4, reachRate: 18 }, macro: { label: '200K+ followers', engagementRate: 1.8, reachRate: 14 } },
+      'tiktok-live': { nano: { label: '<500 peak viewers', peakViewers: 180, newFollowers: 40, diamondRate: 0.8 }, micro: { label: '500–2K peak viewers', peakViewers: 900, newFollowers: 180, diamondRate: 2.4 }, mid: { label: '2K–10K peak viewers', peakViewers: 4200, newFollowers: 640, diamondRate: 8.2 }, macro: { label: '10K+ peak viewers', peakViewers: 18000, newFollowers: 2400, diamondRate: 28 } },
       tiktok: { nano: { label: '1K–10K followers', engagementRate: 5.5, completionRate: 30 }, micro: { label: '10K–50K followers', engagementRate: 4.2, completionRate: 33 }, mid: { label: '50K–200K followers', engagementRate: 3.4, completionRate: 36 }, macro: { label: '200K+ followers', engagementRate: 2.6, completionRate: 39 } }
     }
   },
@@ -65,6 +68,18 @@ export default async function handler(req, res) {
   "content": [{"label":"string","insight":"string"${isComparison ? ',"change":"up|down|neutral","changeText":"string"' : ''}},{"label":"string","insight":"string"${isComparison ? ',"change":"up|down|neutral","changeText":"string"' : ''}},{"label":"string","insight":"string"${isComparison ? ',"change":"up|down|neutral","changeText":"string"' : ''}}],
   "monetisation": [{"label":"string","insight":"string"${isComparison ? ',"change":"up|down|neutral","changeText":"string"' : ''}},{"label":"string","insight":"string"${isComparison ? ',"change":"up|down|neutral","changeText":"string"' : ''}},{"label":"string","insight":"string"${isComparison ? ',"change":"up|down|neutral","changeText":"string"' : ''}}],
   "recommendations": ["string","string","string","string"],
+  "healthScore": number between 0-100 representing overall creator health,
+  "healthBreakdown": [
+    {"label": "Audience growth", "score": number 0-100},
+    {"label": "Content performance", "score": number 0-100},
+    {"label": "Engagement rate", "score": number 0-100},
+    {"label": "Monetisation", "score": number 0-100}
+  ],
+  "trends": [
+    {"label": "string (metric name)", "value": "string (e.g. +12% MoM)", "direction": "up|down|flat"},
+    {"label": "string", "value": "string", "direction": "up|down|flat"},
+    {"label": "string", "value": "string", "direction": "up|down|flat"}
+  ],
   "calendar": [
     {"day":"Mon","type":"string","idea":"content idea max 8 words","rationale":"one sentence why, based on data"},
     {"day":"Tue","type":"string","idea":"string","rationale":"string"},
@@ -100,7 +115,7 @@ export default async function handler(req, res) {
       headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 2500,
+        max_tokens: 3200,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }]
       })
